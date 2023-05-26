@@ -19,12 +19,9 @@ start_time = time.time()
 #  'IN_BYTES', 'TCP_WIN_MAX_OUT', 'SRC_TO_DST_SECOND_BYTES_TOTAL', 'SRC_TO_DST_SECOND_BYTES_MEAN', 'IN_PKTS']
 #
 def packet_handler(pkt): 
-    encoder = LabelEncoder()
     global start_time
 
     data = {
-        #'IPV4_DST_ADDR': None,
-        #'IPV4_SRC_ADDR': None,
         'L4_SRC_PORT': None,
         'TCP_WIN_MAX_IN': 0,
         'MAX_IP_PKT_LEN': None,
@@ -37,13 +34,9 @@ def packet_handler(pkt):
         'SRC_TO_DST_SECOND_BYTES_TOTAL': None,
         'SRC_TO_DST_SECOND_BYTES_MEAN': None,
         'IN_PKTS': 1,
-        #'PROTOCOL': None,
-        #'TCP_FLAGS': 0
     }
 
     data2 = {
-        #'IPV4_DST_ADDR': 175300609,
-        #'IPV4_SRC_ADDR': 175304961,
         'L4_SRC_PORT': 49726,
         'TCP_WIN_MAX_IN': 1024,
         'MAX_IP_PKT_LEN': 0,
@@ -56,8 +49,6 @@ def packet_handler(pkt):
         'SRC_TO_DST_SECOND_BYTES_TOTAL': 44.0,
         'SRC_TO_DST_SECOND_BYTES_MEAN': 44.0,
         'IN_PKTS': 1000,
-        #'PROTOCOL': 6,
-        #'TCP_FLAGS': 22
     }
 
     data['FLOW_DURATION_MILLISECONDS'] = (time.time() - start_time)
@@ -65,9 +56,6 @@ def packet_handler(pkt):
      
     if IP in pkt and (TCP in pkt or UDP in pkt):
         start_time = time.time()
-        #data['IPV4_SRC_ADDR'] = ip2long(pkt[IP].src)
-        #data['IPV4_DST_ADDR'] = ip2long(pkt[IP].dst)
-        #data['PROTOCOL'] = pkt[IP].proto
         data['IN_BYTES'] = pkt[IP].len
         data['MIN_IP_PKT_LEN'] = pkt[IP].len
         data['MAX_IP_PKT_LEN'] = pkt[IP].len
@@ -82,7 +70,6 @@ def packet_handler(pkt):
             if TCP in pkt:
                 data['L4_SRC_PORT'] = pkt[TCP].sport
                 data['L4_DST_PORT'] = pkt[TCP].dport
-                #data['TCP_FLAGS'] = pkt[TCP].flags.value
                 data['TCP_WIN_MAX_IN'] = pkt[TCP].window
                 
                 try:
@@ -100,7 +87,6 @@ def packet_handler(pkt):
             if UDP in pkt:
                 data['L4_SRC_PORT'] = pkt[UDP].sport
                 data['L4_DST_PORT'] = pkt[UDP].dport
-                #data['TCP_FLAGS'] = 0
                 
                 try:
                     l7 = socket.getservbyport(int(pkt[UDP].sport),'udp')
