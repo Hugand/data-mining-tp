@@ -50,6 +50,25 @@ def packet_handler(pkt):
         'TCP_FLAGS': 0
     }
 
+    data2 = {
+        'IPV4_DST_ADDR': 175300608,
+        'IPV4_SRC_ADDR': 175304960,
+        'L7_PROTO_NAME': 332,
+        'L4_SRC_PORT': 49726,
+        'MAX_IP_PKT_LEN': 0,
+        'L4_DST_PORT': 15149,
+        'TCP_WIN_MAX_IN': 1024,
+        'FLOW_DURATION_MILLISECONDS': 1,
+        'MIN_IP_PKT_LEN': 0,
+        'TCP_WIN_MAX_OUT': 0,
+        'SRC_TO_DST_SECOND_BYTES_MEAN': 44.0,
+        'IN_BYTES': 44,
+        'SRC_TO_DST_SECOND_BYTES_TOTAL': 44.0 ,
+        'IN_PKTS': 1,
+        'PROTOCOL': 6,
+        'TCP_FLAGS': 22
+    }
+
     data['FLOW_DURATION_MILLISECONDS'] = (time.time() - start_time)
     start_time = time.time()
      
@@ -74,29 +93,41 @@ def packet_handler(pkt):
                 data['L4_DST_PORT'] = pkt[TCP].dport
                 data['TCP_FLAGS'] = pkt[TCP].flags.value
                 data['TCP_WIN_MAX_IN'] = pkt[TCP].window
-
+                '''
                 try:
                     l7 = socket.getservbyport(int(pkt[TCP].sport))
-                    data['L7_PROTO_NAME'] =  l7_pn_encoder.transform([l7])[0]
+                    l7 = l7.upper()
+                    try:
+                        data['L7_PROTO_NAME'] =  l7_pn_encoder.transform([l7])[0]
+                    except ValueError:
+                        data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
+                    
                 except socket.error:
                     data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
+                '''
+                data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
 
             if UDP in pkt:
                 data['L4_SRC_PORT'] = pkt[UDP].sport
                 data['L4_DST_PORT'] = pkt[UDP].dport
                 data['TCP_FLAGS'] = 0
-
+                '''
                 try:
-                    l7 = socket.getservbyport(int(pkt[TCP].sport),'udp')
-                    data['L7_PROTO_NAME'] =  l7_pn_encoder.transform([l7])[0]
+                    l7 = socket.getservbyport(int(pkt[UDP].sport),'udp')
+                    l7 = l7.upper()
+                    try:
+                        data['L7_PROTO_NAME'] =  l7_pn_encoder.transform([l7])[0]
+                    except ValueError:
+                        data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
                 except socket.error:
                     data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
-
+                '''
+                data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
 
         prediction=forest.predict(pd.DataFrame([data]))
         pred = attack_encoder.inverse_transform(prediction)[0]
-        if pred != "Benign":
-            print(pred)
+        #if pred != "Benign":
+        print(pkt.summary(),"           TYPE:", pred)
 
 sniff(prn=packet_handler)
 
