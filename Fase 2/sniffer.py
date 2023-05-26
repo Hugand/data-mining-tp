@@ -61,9 +61,12 @@ def packet_handler(pkt):
         data['IN_BYTES'] = pkt[IP].len
         data['MIN_IP_PKT_LEN'] = pkt[IP].len
         data['MAX_IP_PKT_LEN'] = pkt[IP].len
-        data['SRC_TO_DST_SECOND_BYTES_MEAN'] = pkt[IP].len
-        data['SRC_TO_DST_SECOND_BYTES_TOTAL'] = pkt[IP].len
-
+        if data['FLOW_DURATION_MILLISECONDS'] > 0:
+            data['SRC_TO_DST_SECOND_BYTES_MEAN'] = pkt[IP].len / data['FLOW_DURATION_MILLISECONDS']
+            data['SRC_TO_DST_SECOND_BYTES_TOTAL'] = pkt[IP].len / data['FLOW_DURATION_MILLISECONDS']
+        else:
+            data['SRC_TO_DST_SECOND_BYTES_MEAN'] = pkt[IP].len
+            data['SRC_TO_DST_SECOND_BYTES_TOTAL'] = pkt[IP].len
 
         if TCP in pkt or UDP in pkt:
             if TCP in pkt:
@@ -77,7 +80,6 @@ def packet_handler(pkt):
                     data['L7_PROTO_NAME'] =  l7_pn_encoder.transform([l7])[0]
                 except socket.error:
                     data['L7_PROTO_NAME'] = l7_pn_encoder.transform(["Unknown"])[0]
-                    #data['L7_PROTO_NAME'] = l7_pn_encoder.transform([protocol_name])[0]
 
             if UDP in pkt:
                 data['L4_SRC_PORT'] = pkt[UDP].sport
