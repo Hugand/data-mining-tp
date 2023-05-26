@@ -35,7 +35,7 @@ def packet_handler(pkt):
         'SRC_TO_DST_SECOND_BYTES_MEAN': None,
         'IN_PKTS': 1,
     }
-
+    #Exemplo de Syn attack
     data2 = {
         'L4_SRC_PORT': 49726,
         'TCP_WIN_MAX_IN': 1024,
@@ -103,6 +103,8 @@ def packet_handler(pkt):
             prediction=forestAttack.predict(pd.DataFrame([data]))
             pred = attack_encoder.inverse_transform(prediction)[0]
             print(pkt.summary(),"           TYPE:", pred)
+        #else:
+        #    print(pkt.summary(),"           TYPE: Bening")
 
 sniff(prn=packet_handler)
 
